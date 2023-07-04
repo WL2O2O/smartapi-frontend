@@ -12,10 +12,18 @@ export type Props = {
 };
 
 const CreateModal: React.FC<Props> = (props) => {
-  const { visible, columns } = props;
+  const { visible, columns, onCancel, onSubmit } = props;
 
-  return <Modal visible={visible} >
-    <ProTable type="form" columns={columns} />
-    </Modal>;
+  return (
+    <Modal visible={visible} footer={null} onCancel={() => onCancel?.()}>
+      <ProTable
+        type="form"
+        columns={columns}
+        onSubmit={async (value) => {
+          onSubmit?.(value);
+        }}
+      />
+    </Modal>
+  );
 };
 export default CreateModal;
