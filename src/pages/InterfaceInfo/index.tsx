@@ -1,9 +1,7 @@
 import CreateModal from '@/pages/InterfaceInfo/components/CreateModal';
-import UpdateForm from '@/pages/InterfaceInfo/components/UpdateForm';
-import { removeRule, updateRule } from '@/services/ant-design-pro/api';
 import {
-  addInterfaceInfoUsingPOST,
-  listInterfaceInfoByPageUsingGET
+  addInterfaceInfoUsingPOST, deleteInterfaceInfoUsingPOST,
+  listInterfaceInfoByPageUsingGET, updateInterfaceInfoUsingPOST
 } from '@/services/smartapi-backend/interfaceInfoController';
 import { PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
@@ -16,55 +14,12 @@ import {
 import '@umijs/max';
 import { Button, Drawer, message } from 'antd';
 import React, { useRef, useState } from 'react';
+import UpdateModal from "@/pages/InterfaceInfo/components/UpdateModal";
+import {SortOrder} from "antd/es/table/interface";
 
 
 
-/**
- * @en-US Update node
- * @zh-CN 更新节点
- *
- * @param fields
- */
-const handleUpdate = async (fields: FormValueType) => {
-  const hide = message.loading('Configuring');
-  try {
-    await updateRule({
-      name: fields.name,
-      desc: fields.desc,
-      key: fields.key,
-    });
-    hide();
-    message.success('Configuration is successful');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('Configuration failed, please try again!');
-    return false;
-  }
-};
 
-/**
- *  Delete node
- * @zh-CN 删除节点
- *
- * @param selectedRows
- */
-const handleRemove = async (selectedRows: API.RuleListItem[]) => {
-  const hide = message.loading('正在删除');
-  if (!selectedRows) return true;
-  try {
-    await removeRule({
-      key: selectedRows.map((row) => row.key),
-    });
-    hide();
-    message.success('Deleted successfully and will refresh soon');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('Delete failed, please try again');
-    return false;
-  }
-};
 const TableList: React.FC = () => {
   /**
    * @en-US Pop-up window of new window
@@ -102,6 +57,53 @@ const TableList: React.FC = () => {
       return false;
     }
   };
+
+  /**
+   *  Delete node
+   * @zh-CN 删除节点
+   *
+   * @param record
+   */
+  const handleRemove = async (record: API.InterfaceInfo) => {
+    const hide = message.loading('正在删除');
+    if (!record) return true;
+    try {
+      await deleteInterfaceInfoUsingPOST({
+        id: record.id
+      });
+      hide();
+      message.success('删除成功');
+      actionRef.current?.reload();
+      return true;
+    } catch (error: any) {
+      hide();
+      message.error('删除失败，' + error.message);
+      return false;
+    }
+  };
+
+  /**
+   * @en-US Update node
+   * @zh-CN 更新节点
+   *
+   * @param fields
+   */
+  const handleUpdate = async (fields: API.InterfaceInfo) => {
+    const hide = message.loading('修改中');
+    try {
+      await updateInterfaceInfoUsingPOST({
+        ...fields
+      });
+      hide();
+      message.success('操作成功');
+      return true;
+    } catch (error: any) {
+      hide();
+      message.error('操作失败，' + error.message);
+      return false;
+    }
+  };
+
   /**
    * @en-US International configuration
    * @zh-CN 国际化配置
@@ -189,7 +191,12 @@ const TableList: React.FC = () => {
         >
           修改
         </a>,
-        <a key="subscribeAlert" href="https://procomponents.ant.design/">
+        <a
+          key="config"
+          onClick={() => {
+            handleRemove(record)
+          }}
+        >
           删除
         </a>,
       ],
@@ -277,7 +284,8 @@ const TableList: React.FC = () => {
         </FooterToolbar>
       )}
 
-      <UpdateForm
+      <UpdateModal
+        columns={columns}
         onSubmit={async (value) => {
           const success = await handleUpdate(value);
           if (success) {
@@ -294,7 +302,7 @@ const TableList: React.FC = () => {
             setCurrentRow(undefined);
           }
         }}
-        updateModalOpen={updateModalOpen}
+        visible={updateModalOpen}
         values={currentRow || {}}
       />
 
