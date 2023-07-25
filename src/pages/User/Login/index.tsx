@@ -18,7 +18,6 @@ import { useEmotionCss } from '@ant-design/use-emotion-css';
 import { Helmet, history, useModel } from '@umijs/max';
 import { Alert, message, Tabs } from 'antd';
 import React, { useState } from 'react';
-import { flushSync } from 'react-dom';
 import Settings from '../../../../config/defaultSettings';
 import {userLoginUsingPOST} from "@/services/smartapi-backend/userController";
 const ActionIcons = () => {
