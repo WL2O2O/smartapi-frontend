@@ -115,7 +115,7 @@ const Login: React.FC = () => {
           {'登录'}- {Settings.title}
         </title>
       </Helmet>
-      <Lang />
+
       <div
         style={{
           flex: '1',
